@@ -42,7 +42,7 @@ local function createKeyDisplay()
 	container.Name = "KeyContainer"
 	container.AnchorPoint = Vector2.new(0.5, 0.5)
 	container.Position = UDim2.fromScale(0.5, 0.5)
-	container.Size = UDim2.fromOffset(150, 58)
+	container.Size = UDim2.fromOffset(160, 62)
 	container.BackgroundTransparency = 1
 	container.Parent = screenGui
 
@@ -50,25 +50,51 @@ local function createKeyDisplay()
 	layout.FillDirection = Enum.FillDirection.Horizontal
 	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	layout.VerticalAlignment = Enum.VerticalAlignment.Center
-	layout.Padding = UDim.new(0, 8)
+	layout.Padding = UDim.new(0, 10)
 	layout.Parent = container
 
 	local function createKey(text, width)
+		-- Glow behind the key
+		local glow = Instance.new("Frame")
+		glow.Name = text .. "Glow"
+		glow.AnchorPoint = Vector2.new(0.5, 0.5)
+		glow.Position = UDim2.fromScale(0.5, 0.5)
+		glow.Size = UDim2.fromOffset(width + 22, 52)
+		glow.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+		glow.BackgroundTransparency = 0.75
+		glow.BorderSizePixel = 0
+		glow.ZIndex = 1
+		glow.Parent = container
+
+		local glowCorner = Instance.new("UICorner")
+		glowCorner.CornerRadius = UDim.new(0, 10)
+		glowCorner.Parent = glow
+
+		local glowStroke = Instance.new("UIStroke")
+		glowStroke.Color = Color3.fromRGB(55, 55, 55)
+		glowStroke.Thickness = 8
+		glowStroke.Transparency = 0.45
+		glowStroke.Parent = glow
+
+		-- Actual key
 		local key = Instance.new("TextLabel")
 		key.Name = text .. "Key"
-		key.Size = UDim2.fromOffset(width, 50)
+		key.Size = UDim2.fromOffset(width, 44)
 		key.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 		key.BackgroundTransparency = 0
 		key.BorderSizePixel = 0
 		key.Text = text
 		key.TextColor3 = Color3.fromRGB(235, 235, 235)
-		key.TextSize = 18
+		key.TextSize = 17
 		key.Font = Enum.Font.GothamMedium
 		key.ZIndex = 2
-		key.Parent = container
+		key.Parent = glow
+
+		key.AnchorPoint = Vector2.new(0.5, 0.5)
+		key.Position = UDim2.fromScale(0.5, 0.5)
 
 		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 8)
+		corner.CornerRadius = UDim.new(0, 7)
 		corner.Parent = key
 
 		local stroke = Instance.new("UIStroke")
@@ -77,55 +103,42 @@ local function createKeyDisplay()
 		stroke.Transparency = 0
 		stroke.Parent = key
 
-		-- Dark gray glow
-		local glow = Instance.new("ImageLabel")
-		glow.Name = "Glow"
-		glow.AnchorPoint = Vector2.new(0.5, 0.5)
-		glow.Position = UDim2.fromScale(0.5, 0.5)
-		glow.Size = UDim2.new(1, 28, 1, 28)
-		glow.BackgroundTransparency = 1
-		glow.Image = "rbxassetid://5028857084"
-		glow.ImageColor3 = Color3.fromRGB(55, 55, 55)
-		glow.ImageTransparency = 0.45
-		glow.ZIndex = 1
-		glow.Parent = key
-
 		--==================================================
-		-- PULSE
+		-- SOFT PULSING GLOW
 		--==================================================
 
-		task.spawn(function()
-			local pulseInfo = TweenInfo.new(
-				0.8,
-				Enum.EasingStyle.Sine,
-				Enum.EasingDirection.InOut,
-				-1,
-				true
-			)
+		local pulseInfo = TweenInfo.new(
+			0.9,
+			Enum.EasingStyle.Sine,
+			Enum.EasingDirection.InOut,
+			-1,
+			true
+		)
 
-			TweenService:Create(
-				key,
-				pulseInfo,
-				{
-					BackgroundColor3 = Color3.fromRGB(65, 65, 65)
-				}
-			):Play()
+		TweenService:Create(
+			glow,
+			pulseInfo,
+			{
+				Size = UDim2.fromOffset(width + 34, 62),
+				BackgroundTransparency = 0.58
+			}
+		):Play()
 
-			TweenService:Create(
-				glow,
-				pulseInfo,
-				{
-					ImageTransparency = 0.15,
-					Size = UDim2.new(1, 38, 1, 38)
-				}
-			):Play()
-		end)
+		TweenService:Create(
+			glowStroke,
+			pulseInfo,
+			{
+				Thickness = 12,
+				Transparency = 0.2
+			}
+		):Play()
 
 		return key
 	end
 
+	-- Shift LEFT, F RIGHT
 	createKey("Shift", 82)
-	createKey("F", 50)
+	createKey("F", 48)
 
 	--==================================================
 	-- DISAPPEAR AFTER 5 SECONDS
@@ -162,12 +175,12 @@ local function createKeyDisplay()
 					}
 				):Play()
 
-			elseif object:IsA("ImageLabel") then
+			elseif object:IsA("Frame") then
 				TweenService:Create(
 					object,
 					fadeInfo,
 					{
-						ImageTransparency = 1
+						BackgroundTransparency = 1
 					}
 				):Play()
 			end
