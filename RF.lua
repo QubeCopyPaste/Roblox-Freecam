@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
@@ -23,6 +24,131 @@ local ROTATION_STIFFNESS = 7
 local ROTATION_DAMPING = 4.5
 
 local SENSITIVITY = 0.0025
+
+--==================================================
+-- STARTUP KEY DISPLAY
+--==================================================
+
+local function createKeyDisplay()
+	local playerGui = player:WaitForChild("PlayerGui")
+
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "FreecamKeyDisplay"
+	screenGui.ResetOnSpawn = false
+	screenGui.IgnoreGuiInset = true
+	screenGui.Parent = playerGui
+
+	local container = Instance.new("Frame")
+	container.Name = "KeyContainer"
+	container.AnchorPoint = Vector2.new(0.5, 0.5)
+	container.Position = UDim2.fromScale(0.5, 0.5)
+	container.Size = UDim2.fromOffset(150, 58)
+	container.BackgroundTransparency = 1
+	container.Parent = screenGui
+
+	local layout = Instance.new("UIListLayout")
+	layout.FillDirection = Enum.FillDirection.Horizontal
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+	layout.VerticalAlignment = Enum.VerticalAlignment.Center
+	layout.Padding = UDim.new(0, 8)
+	layout.Parent = container
+
+	local function createKey(text, width)
+		local key = Instance.new("TextLabel")
+		key.Name = text .. "Key"
+		key.Size = UDim2.fromOffset(width, 50)
+		key.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+		key.BackgroundTransparency = 0
+		key.BorderSizePixel = 0
+		key.Text = text
+		key.TextColor3 = Color3.fromRGB(235, 235, 235)
+		key.TextSize = 18
+		key.Font = Enum.Font.GothamMedium
+		key.Parent = container
+
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 8)
+		corner.Parent = key
+
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = Color3.fromRGB(25, 25, 25)
+		stroke.Thickness = 2
+		stroke.Transparency = 0
+		stroke.Parent = key
+
+		-- Dark gray glow
+		local glow = Instance.new("ImageLabel")
+		glow.Name = "Glow"
+		glow.AnchorPoint = Vector2.new(0.5, 0.5)
+		glow.Position = UDim2.fromScale(0.5, 0.5)
+		glow.Size = UDim2.new(1, 28, 1, 28)
+		glow.BackgroundTransparency = 1
+		glow.Image = "rbxassetid://5028857084"
+		glow.ImageColor3 = Color3.fromRGB(35, 35, 35)
+		glow.ImageTransparency = 0.35
+		glow.ZIndex = 0
+		glow.Parent = key
+
+		key.ZIndex = 1
+
+		return key
+	end
+
+	createKey("Shift", 82)
+	createKey("F", 50)
+
+	-- Keep the keys visible for 5 seconds
+	task.delay(5, function()
+		if not screenGui or not screenGui.Parent then
+			return
+		end
+
+		local fadeInfo = TweenInfo.new(
+			0.5,
+			Enum.EasingStyle.Quad,
+			Enum.EasingDirection.Out
+		)
+
+		for _, object in ipairs(container:GetDescendants()) do
+			if object:IsA("TextLabel") then
+				TweenService:Create(
+					object,
+					fadeInfo,
+					{
+						TextTransparency = 1,
+						BackgroundTransparency = 1
+					}
+				):Play()
+
+			elseif object:IsA("UIStroke") then
+				TweenService:Create(
+					object,
+					fadeInfo,
+					{
+						Transparency = 1
+					}
+				):Play()
+
+			elseif object:IsA("ImageLabel") then
+				TweenService:Create(
+					object,
+					fadeInfo,
+					{
+						ImageTransparency = 1
+					}
+				):Play()
+			end
+		end
+
+		task.wait(0.5)
+
+		if screenGui then
+			screenGui:Destroy()
+		end
+	end)
+end
+
+createKeyDisplay()
 
 --==================================================
 -- STATE
