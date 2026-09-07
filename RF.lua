@@ -64,6 +64,7 @@ local function createKeyDisplay()
 		key.TextColor3 = Color3.fromRGB(235, 235, 235)
 		key.TextSize = 18
 		key.Font = Enum.Font.GothamMedium
+		key.ZIndex = 2
 		key.Parent = container
 
 		local corner = Instance.new("UICorner")
@@ -84,12 +85,41 @@ local function createKeyDisplay()
 		glow.Size = UDim2.new(1, 28, 1, 28)
 		glow.BackgroundTransparency = 1
 		glow.Image = "rbxassetid://5028857084"
-		glow.ImageColor3 = Color3.fromRGB(35, 35, 35)
-		glow.ImageTransparency = 0.35
-		glow.ZIndex = 0
+		glow.ImageColor3 = Color3.fromRGB(55, 55, 55)
+		glow.ImageTransparency = 0.45
+		glow.ZIndex = 1
 		glow.Parent = key
 
-		key.ZIndex = 1
+		--==================================================
+		-- PULSE
+		--==================================================
+
+		task.spawn(function()
+			local pulseInfo = TweenInfo.new(
+				0.8,
+				Enum.EasingStyle.Sine,
+				Enum.EasingDirection.InOut,
+				-1,
+				true
+			)
+
+			TweenService:Create(
+				key,
+				pulseInfo,
+				{
+					BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+				}
+			):Play()
+
+			TweenService:Create(
+				glow,
+				pulseInfo,
+				{
+					ImageTransparency = 0.15,
+					Size = UDim2.new(1, 38, 1, 38)
+				}
+			):Play()
+		end)
 
 		return key
 	end
@@ -97,7 +127,10 @@ local function createKeyDisplay()
 	createKey("Shift", 82)
 	createKey("F", 50)
 
-	-- Keep the keys visible for 5 seconds
+	--==================================================
+	-- DISAPPEAR AFTER 5 SECONDS
+	--==================================================
+
 	task.delay(5, function()
 		if not screenGui or not screenGui.Parent then
 			return
